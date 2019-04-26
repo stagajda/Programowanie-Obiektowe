@@ -1,36 +1,17 @@
-package optymalnabudowa;
+//package optymalnabudowa;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
-public class StrategiaEkologiczna {
-    public InputData dane;
+public class StrategiaEkologiczna extends Strategia {
+    private InputData dane;
     public StrategiaEkologiczna(InputData dane){
         this.dane = dane;
     }
-    private boolean sameZera(Vector <Long> tab){
-        boolean wyn = true;
-        for(int i = 0; i < tab.size()-1; i++){
-            wyn = wyn && (tab.get(i) == 0);
-        }
-        return wyn;
-    }
-    
-        // odwraca wszystkie wektory bedace elementami wektora podanego jako parametr
-    private Vector <Vector <Long> > odwrocWektory(Vector < Vector < Long > > wektor){
-        long temp;
-        for(int i = 0;i < wektor.size();i++){
-            for(int j = 0;j < wektor.get(i).size()/2;j++){
-                temp = wektor.get(i).get(wektor.get(i).size()-j-1);
-                wektor.get(i).set(wektor.get(i).size()-j-1, wektor.get(i).get(j));
-                wektor.get(i).set(j,temp);
-            }
-        }
-        return wektor;
-    }
 
-    long najmniejOdpadow (Vector <Long> stan, Map <Vector <Long>, Long> mapa, Map <Vector <Long>, Vector<Long>> bestSasiad) {
+    long najmniejOdpadow (Vector <Long> stan, Map <Vector <Long>,
+            Long> mapa, Map <Vector <Long>, Vector<Long>> bestSasiad) {
         long minOdpadow = Long.MAX_VALUE;
         Vector <Long> najlepszySasiedniStan = new Vector <Long>();
         if(mapa.containsKey(stan)){
@@ -114,8 +95,8 @@ public class StrategiaEkologiczna {
             }
             if(sumaWybranychSasiad == 0){
                 int indeks = dane.indeksNajkrotszegoWiekszegoOd(sumaWybranych);
-                long xd = dane.dlugoscPretaWCenniku[indeks];
-                wyniki.get(wyniki.size()-1).add(xd);
+                long temp = dane.dlugoscPretaWCenniku[indeks];
+                wyniki.get(wyniki.size()-1).add(temp);
                 cenaSumaryczna += (long) dane.cenaPreta[indeks];
                 wyniki.add(new Vector <Long>());
             }
@@ -135,4 +116,3 @@ public class StrategiaEkologiczna {
     }
     
 }
-// JURA

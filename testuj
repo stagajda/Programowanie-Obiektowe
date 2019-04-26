@@ -1,0 +1,14 @@
+#!/bin/bash
+
+for f in tests/*.in
+do
+	echo "dupa"
+	java -classpath src Main <$f >${f%in}moj
+	
+	if diff <(head -n 2 ${f%in}moj) <(head -n 2 ${f%in}out)
+	then
+		echo "ok $f"
+	else
+		echo "zle $f"
+	fi
+done

@@ -1,4 +1,4 @@
-package optymalnabudowa;
+//package optymalnabudowa;
 
 public class InputData {
     public int C;
@@ -21,6 +21,20 @@ public class InputData {
             }
         }
         return wynikDlugosc;
+    }
+    
+    // tabDlugosci i tabCen okreslaja cene i dlugosc kolejnych pretow,
+    // funkcja zwraca najtanszy pret o dlugosci wiekszej lub rownej "dlugosc"
+    // zakladamy, ze taki istnieje
+    public long cenaNajtanszegoWiekszegoOd(long dlugosc){
+        long wynik = Long.MAX_VALUE;
+        for(int j = 0; j < C; j++){
+            if(dlugoscPretaWCenniku[j] >= dlugosc){
+                wynik = Math.min(wynik, cenaPreta[j]);
+            }
+        }
+        assert(wynik != Long.MAX_VALUE);
+        return wynik;
     }
     
     // zaklada ze istnieje pret o dlugosci wiekszej od dlugosc

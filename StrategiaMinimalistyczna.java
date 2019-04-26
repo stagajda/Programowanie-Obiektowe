@@ -1,11 +1,15 @@
-package optymalnabudowa;
+//package optymalnabudowa;
 import java.util.Vector;
 
-public class StrategiaMinimalistyczna implements Strategia{
-    static void rozwiaz(InputData dane){
+public class StrategiaMinimalistyczna extends Strategia{
+    public InputData dane;
+    StrategiaMinimalistyczna(InputData dane){
+        this.dane = dane;
+    }
+    public void rozwiaz(){
         Vector<Vector <Integer> > wynik = new Vector < Vector <Integer> >();
-        int kosztZakupu = 0;
-        int sumaOdpadow = 0;
+        long kosztZakupu = 0;
+        long sumaOdpadow = 0;
         int dostepnaDlugoscPreta;
         int najdluzszyRozwazanyZCennika = dane.C - 1;
         boolean czyKupiony[] = new boolean[dane.P];

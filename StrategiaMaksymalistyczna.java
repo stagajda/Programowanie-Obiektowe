@@ -1,13 +1,17 @@
-package optymalnabudowa;
+//package optymalnabudowa;
 import java.util.Vector;
 
-public class StrategiaMaksymalistyczna implements Strategia{
-    static void rozwiaz(InputData dane){
+public class StrategiaMaksymalistyczna extends Strategia{
+    private InputData dane;
+    StrategiaMaksymalistyczna(InputData dane){
+        this.dane = dane;
+    }
+    public void rozwiaz(){
         Vector<Vector <Integer> > wynik = new Vector < Vector <Integer> >();
         long kosztZakupu = 0;
         long sumaOdpadow = 0;
         int dostepnaDlugoscPreta;
-        boolean czyKupiony[] = new boolean[dane.P];
+        boolean czyKupiony[] = new boolean[this.dane.P];
         for (int i = dane.P - 1; i >= 0; i--) {
             if(!czyKupiony[i]){
                 // kupujemy najdluzszy pret z cennika

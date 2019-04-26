@@ -1,32 +1,13 @@
-package optymalnabudowa;
+//package optymalnabudowa;
 import java.util.*;
 
-public class StrategiaEkonomiczna {
-    public InputData dane; 
+public class StrategiaEkonomiczna extends Strategia {
+    private InputData dane; 
     public StrategiaEkonomiczna(InputData dane){
         this.dane = dane;
     }
-    // sprawdza, czy sa same zera na wszystkich pozycjach oprocz ostatniej
-    private boolean sameZera(Vector <Long> tab){
-        boolean wyn = true;
-        for(int i = 0; i < tab.size()-1; i++){
-            wyn = wyn && (tab.get(i) == 0);
-        }
-        return wyn;
-    }
-    // tabDlugosci i tabCen okreslaja cene i dlugosc kolejnych pretow,
-    // funkcja zwraca najtanszy pret o dlugosci wiekszej lub rownej "dlugosc"
-    private long cenaNajtanszegoWiekszegoOd(long dlugosc){
-        long wynik = Long.MAX_VALUE;
-        for(int j = 0; j < dane.C; j++){
-            if(dane.dlugoscPretaWCenniku[j] >= dlugosc){
-                wynik = Math.min(wynik, dane.cenaPreta[j]);
-            }
-        }
-        assert(wynik != Long.MAX_VALUE);
-        return wynik;
-    }
     
+    // oblicza sume odpadow na podstawie wektora reprezentujacego wynik
     private long sumaOdpadow(Vector <Vector <Long> > wyniki){
         long wynik = 0;
         for(int i = 0; i < wyniki.size()-1;i++){
@@ -38,51 +19,46 @@ public class StrategiaEkonomiczna {
         return wynik;
     }
     
-    // odwraca wszystkie wektory bedace elementami wektora podanego jako parametr
-    private Vector <Vector <Long> > odwrocWektory(Vector < Vector < Long > > wektor){
-        long temp;
-        for(int i = 0;i < wektor.size();i++){
-            for(int j = 0;j < wektor.get(i).size()/2;j++){
-                temp = wektor.get(i).get(wektor.get(i).size()-j-1);
-                wektor.get(i).set(wektor.get(i).size()-j-1, wektor.get(i).get(j));
-                wektor.get(i).set(j,temp);
-            }
-        }
-        return wektor;
-    }
-    /* stan - tablica okreslajaca, czy potrzebujemy kupic dany pret
-       sumaWybranych - suma dlugosci pretow, ktore polaczylismy w jedna grupe
-       te prety sa widoczne w stanie jako juz kupione
-       minIndeks - mozemy wybrac tylko prety o tym indeksie lub wyzszym
-       rozpatrujemy wszystkie mozliwosci rekurencyjnie - 
-       wybranie dodatkowych pretow do grupy wybranych
+    
+    /* stan - wektor, ktorego pierwsze n-1 pozycji okresla, czy potrzebujemy
+       kupic dany pret, (0 nie, 1 tak), a ostatnia pozycja oznacza koszt
+       aktualnie wybranych pretow
+       mapa - podaje informacje o najnizszym koszcie dla danego stanu
+       bestSasiad - dla danego stanu podaje najkorzystniejszy sasiedni stan
     */
-    long najnizszyKoszt(Vector <Long> stan, Map <Vector <Long>, Long> mapa, Map <Vector <Long>, Vector<Long>> bestSasiad) {
+    long najnizszyKoszt(Vector <Long> stan, Map <Vector <Long>, Long> mapa,
+                        Map <Vector <Long>, Vector<Long>> bestSasiad) {
         Vector <Long> najlepszySasiedniStan = new Vector <Long>();
         if(mapa.containsKey(stan)){
             return mapa.get(stan);
         }
         long sumaWybranych = stan.get(stan.size()-1);
+        
         // nie da sie nic wybrac, wiec przerywamy i zwracamy duza wartosc
         if(sumaWybranych > dane.dlugoscPretaWCenniku[dane.C-1]) {
             return Long.MAX_VALUE;
         }
-        //System.out.println(minIndeks + " " + sumaWybranych);
+
         long wynik = Long.MAX_VALUE;
         if(sumaWybranych == 0 && sameZera(stan)) {
             return 0;
         }
-        // uznajemy te wybrane za ostateczna grupe
+        /* Rozwazamy uznanie wybranych pretow za grupe i zakup najtanszego 
+            pretu dluzszy od ich sumy.
+        */
         if(sumaWybranych > 0) {
             Vector <Long> klon = new Vector <Long>(stan);
             klon.set(klon.size()-1, (long) 0);
-            if(najnizszyKoszt(klon, mapa, bestSasiad) < wynik - cenaNajtanszegoWiekszegoOd(sumaWybranych)){
-                wynik = cenaNajtanszegoWiekszegoOd(sumaWybranych) + najnizszyKoszt(klon, mapa, bestSasiad);
+            long temp = dane.cenaNajtanszegoWiekszegoOd(sumaWybranych);
+            if(najnizszyKoszt(klon, mapa, bestSasiad) < wynik - temp){
+                wynik = temp + najnizszyKoszt(klon, mapa, bestSasiad);
                 najlepszySasiedniStan = klon;
             }
         }
         
-        // probujemy dodac jakis do tych wybranych
+        /* probujemy dodac jakis pret, ktorego jeszcze nie mamy
+           do tych wybranych
+        */
         for(int i = 0; i < dane.P; i++) {
             if(stan.get(i) == 1) {
                 Vector <Long> klon = new Vector <Long>(stan);
@@ -98,8 +74,7 @@ public class StrategiaEkonomiczna {
         bestSasiad.put(stan, najlepszySasiedniStan);
         return wynik;
     }
-    // stan to wektor - na ostatnich 2 pozycjach ma zapisany min indeks i sume wybranych
-    // na pierwszych n-2 pozycjach 0 i 1 oznaczajace, czy dany pret jeszcze musimy dokupic
+    
     public void rozwiaz(){
         Map <Vector <Long>, Long> mapa = new HashMap <Vector <Long>, Long>();
         Map <Vector <Long>, Vector<Long>> bestSasiad = new HashMap <Vector <Long>, Vector<Long> >();
@@ -111,24 +86,24 @@ public class StrategiaEkonomiczna {
         stan.add((long) 0);
         long najnizszyKosztZakupu = najnizszyKoszt(stan, mapa, bestSasiad);
         
-        // odzyskujemy wynik - znajdujemy ktore prety kupilismy i jak podzielilismy
-        
+        // odzyskujemy wynik - znajdujemy ktore prety kupilismy i jak podzielilismy        
         Vector < Vector <Long> > wyniki = new Vector < Vector <Long> >();
         wyniki.add(new Vector <Long>());
         while(true){
-            //System.out.println(stan.toString());
             Vector <Long> sasiedniStan = bestSasiad.get(stan);
             if(sasiedniStan == null) {
                 break;
             }
             long sumaWybranychSasiad = sasiedniStan.get(dane.P);
             long sumaWybranych = stan.get(dane.P);
+            
             // to znaczy, ze sprzedalismy wszystkie, wczesniej wybrane
             if(sumaWybranychSasiad > 0){
                 wyniki.get(wyniki.size()-1).add(sumaWybranychSasiad - sumaWybranych);
             }
             if(sumaWybranychSasiad == 0){
-                wyniki.get(wyniki.size()-1).add(dane.dlugoscNajtanszegoDlugosciConajmniej(sumaWybranych));
+                wyniki.get(wyniki.size()-1).add(
+                        dane.dlugoscNajtanszegoDlugosciConajmniej(sumaWybranych));
                 wyniki.add(new Vector <Long>());
             }
             stan = sasiedniStan;

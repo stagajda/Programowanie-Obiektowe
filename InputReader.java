@@ -1,4 +1,4 @@
-package optymalnabudowa;
+//package optymalnabudowa;
 import java.util.Scanner;
 public class InputReader {
     public static InputData wczytajWejscie(){
